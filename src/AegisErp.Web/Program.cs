@@ -58,6 +58,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 // EF Core (provider chosen by config) + application services.
 builder.Services.AddAegisInfrastructure(builder.Configuration);
 
+// Self-ping keep-alive so a free-tier host (Render) does not idle to sleep.
+// No-op locally; only active when RENDER_EXTERNAL_URL is present.
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<AegisErp.Web.KeepAliveService>();
+
 var app = builder.Build();
 
 // Create the database (if missing) and seed roles, users and the demo company on startup.
@@ -92,6 +97,9 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
+
+// Cheap anonymous health endpoint used by the keep-alive self-ping (and uptime checks).
+app.MapGet("/health", () => Results.Text("OK"));
 
 // Logout must be a POST so browsers/prefetchers can't trigger it via GET.
 app.MapPost("/Account/Logout", async (SignInManager<AppUser> signInManager) =>
