@@ -93,7 +93,12 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+// no-cache = browsers may store static assets but must revalidate (cheap ETag 304)
+// before using them, so a deploy is never masked by a stale cached stylesheet.
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx => ctx.Context.Response.Headers.CacheControl = "no-cache"
+});
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();

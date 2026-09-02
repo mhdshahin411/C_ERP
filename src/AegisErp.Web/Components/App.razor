@@ -9,10 +9,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
-    <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="AegisErp.Web.styles.css" />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css?v=@AssetVersion" />
+    <link rel="stylesheet" href="app.css?v=@AssetVersion" />
+    <link rel="stylesheet" href="AegisErp.Web.styles.css?v=@AssetVersion" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=@AssetVersion" />
     <title>NexusERP — Finance & Operations</title>
     <HeadOutlet @rendermode="PageRenderMode" />
 </head>
@@ -37,6 +37,11 @@
 </html>
 
 @code {
+    // Changes on every build (assembly MVID), so browsers fetch fresh CSS/JS after each
+    // deploy instead of reusing a stale cached copy under the same URL.
+    private static readonly string AssetVersion =
+        typeof(App).Assembly.ManifestModule.ModuleVersionId.ToString("N")[..8];
+
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
     // Account pages (login/logout/denied) render statically so the sign-in form
