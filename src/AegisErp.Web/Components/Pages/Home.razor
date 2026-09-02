@@ -3,19 +3,23 @@
 @inject LedgerService Ledger
 @inject CustomerService CustomerSvc
 @inject JournalService Journal
+@inject CompanyService Company
 
-<PageTitle>Dashboard · Aegis ERP</PageTitle>
+<PageTitle>Dashboard · NexusERP</PageTitle>
 
-<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+<div class="nx-page-head">
     <div>
+        <div class="nx-eyebrow">Overview</div>
         <MudText Typo="Typo.h5">Finance Dashboard</MudText>
-        <MudText Typo="Typo.body2" Class="mud-text-secondary">Aegis FZE · @(_kpis?.Period ?? "…") · AED</MudText>
+        <div class="nx-sub">@_companyName · @(_kpis?.Period ?? "…") · AED</div>
     </div>
-    <MudSpacer />
     <AuthorizeView Roles="@AppRoles.Posters">
-        <MudButton Href="journal-voucher" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">New Voucher</MudButton>
+        <div class="d-flex gap-2">
+            <MudButton Href="sales-invoice" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ReceiptLong">New Invoice</MudButton>
+            <MudButton Href="journal-voucher" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">New Voucher</MudButton>
+        </div>
     </AuthorizeView>
-</MudStack>
+</div>
 
 @if (_kpis is null)
 {
@@ -24,20 +28,24 @@
 else
 {
     @* ── KPI tiles ── *@
-    <MudGrid>
-        @Kpi("Income (period)", _kpis.Income, Color.Success, Icons.Material.Filled.TrendingUp)
-        @Kpi("Expenses (period)", _kpis.Expense, Color.Error, Icons.Material.Filled.TrendingDown)
-        @Kpi("Net Profit", _kpis.NetProfit, _kpis.NetProfit >= 0 ? Color.Success : Color.Error, Icons.Material.Filled.Savings)
-        @Kpi("Cash & Bank", _kpis.CashAndBank, Color.Info, Icons.Material.Filled.AccountBalance)
-        @Kpi("Receivables", _kpis.Receivables, Color.Primary, Icons.Material.Filled.CallReceived)
-        @Kpi("Payables", _kpis.Payables, Color.Warning, Icons.Material.Filled.CallMade)
+    <MudGrid Spacing="3">
+        @Kpi("Income", _kpis.Income, "success", Icons.Material.Filled.TrendingUp, "This period")
+        @Kpi("Expenses", _kpis.Expense, "error", Icons.Material.Filled.TrendingDown, "This period")
+        @Kpi("Net Profit", _kpis.NetProfit, _kpis.NetProfit >= 0 ? "success" : "error", Icons.Material.Filled.Savings,
+             _kpis.NetProfit >= 0 ? "Profit" : "Loss", _kpis.NetProfit >= 0 ? "pos" : "neg")
+        @Kpi("Cash & Bank", _kpis.CashAndBank, "info", Icons.Material.Filled.AccountBalance, "Across all accounts")
+        @Kpi("Receivables", _kpis.Receivables, "primary", Icons.Material.Filled.CallReceived, "Owed to you")
+        @Kpi("Payables", _kpis.Payables, "warning", Icons.Material.Filled.CallMade, "You owe")
     </MudGrid>
 
     @* ── Chart + quick actions ── *@
-    <MudGrid Class="mt-1">
+    <MudGrid Spacing="3" Class="mt-1">
         <MudItem xs="12" md="8">
-            <MudPaper Class="pa-4" Elevation="1" Style="height:100%">
-                <MudText Typo="Typo.subtitle1" Class="mb-2">Revenue vs Expenses <span style="font-size:11px;color:var(--mud-palette-text-secondary)">(AED, by period)</span></MudText>
+            <MudPaper Class="pa-5" Elevation="1" Style="height:100%">
+                <div class="nx-card-head">
+                    <div class="nx-card-title">Revenue vs Expenses</div>
+                    <div class="nx-card-meta">AED thousands · by period</div>
+                </div>
                 @if (_series is not null && _labels is not null && _labels.Length > 0)
                 {
                     <MudChart ChartType="ChartType.Bar" ChartSeries="_series" XAxisLabels="_labels"
@@ -51,27 +59,52 @@ else
         </MudItem>
         <MudItem xs="12" md="4">
             <MudPaper Class="pa-4" Elevation="1" Style="height:100%">
-                <MudText Typo="Typo.subtitle1" Class="mb-2">Quick actions</MudText>
-                <MudStack Spacing="2">
-                    <MudButton Href="sales-invoice" Variant="Variant.Outlined" FullWidth="true" Class="justify-start" StartIcon="@Icons.Material.Filled.ReceiptLong">New Sales Invoice</MudButton>
-                    <MudButton Href="receipt-voucher" Variant="Variant.Outlined" FullWidth="true" Class="justify-start" StartIcon="@Icons.Material.Filled.Payments">New Receipt</MudButton>
-                    <MudButton Href="journal-voucher" Variant="Variant.Outlined" FullWidth="true" Class="justify-start" StartIcon="@Icons.Material.Filled.PostAdd">New Journal Voucher</MudButton>
-                    <MudButton Href="ar-aging" Variant="Variant.Outlined" FullWidth="true" Class="justify-start" StartIcon="@Icons.Material.Filled.EventNote">AR Aging</MudButton>
-                    <MudButton Href="trial-balance" Variant="Variant.Outlined" FullWidth="true" Class="justify-start" StartIcon="@Icons.Material.Filled.Balance">Trial Balance</MudButton>
-                </MudStack>
+                <div class="nx-card-head px-1">
+                    <div class="nx-card-title">Quick actions</div>
+                </div>
+                <div class="d-flex flex-column gap-1">
+                    <a class="nx-action" href="sales-invoice">
+                        <span class="nx-action__icon"><MudIcon Icon="@Icons.Material.Filled.ReceiptLong" Size="Size.Small" /></span>
+                        <span class="nx-action__text"><b>New Sales Invoice</b><small>Bill a customer</small></span>
+                        <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Class="nx-action__chev" />
+                    </a>
+                    <a class="nx-action" href="receipt-voucher">
+                        <span class="nx-action__icon"><MudIcon Icon="@Icons.Material.Filled.Payments" Size="Size.Small" /></span>
+                        <span class="nx-action__text"><b>New Receipt</b><small>Record a customer payment</small></span>
+                        <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Class="nx-action__chev" />
+                    </a>
+                    <a class="nx-action" href="journal-voucher">
+                        <span class="nx-action__icon"><MudIcon Icon="@Icons.Material.Filled.PostAdd" Size="Size.Small" /></span>
+                        <span class="nx-action__text"><b>New Journal Voucher</b><small>Manual ledger entry</small></span>
+                        <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Class="nx-action__chev" />
+                    </a>
+                    <a class="nx-action" href="ar-aging">
+                        <span class="nx-action__icon"><MudIcon Icon="@Icons.Material.Filled.EventNote" Size="Size.Small" /></span>
+                        <span class="nx-action__text"><b>AR Aging</b><small>Who owes you, and how overdue</small></span>
+                        <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Class="nx-action__chev" />
+                    </a>
+                    <a class="nx-action" href="trial-balance">
+                        <span class="nx-action__icon"><MudIcon Icon="@Icons.Material.Filled.Balance" Size="Size.Small" /></span>
+                        <span class="nx-action__text"><b>Trial Balance</b><small>Check the books balance</small></span>
+                        <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Class="nx-action__chev" />
+                    </a>
+                </div>
             </MudPaper>
         </MudItem>
     </MudGrid>
 
     @* ── Three data cards ── *@
-    <MudGrid Class="mt-1">
+    <MudGrid Spacing="3" Class="mt-1">
         <MudItem xs="12" md="4">
             <MudPaper Class="pa-4" Elevation="1" Style="height:100%">
-                <MudText Typo="Typo.subtitle1" Class="mb-2">Recent Vouchers</MudText>
+                <div class="nx-card-head">
+                    <div class="nx-card-title">Recent Vouchers</div>
+                    <MudLink Href="journal-voucher" Typo="Typo.caption">View all</MudLink>
+                </div>
                 <MudTable Items="_recent" Dense="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
                     <HeaderContent><MudTh>Ref</MudTh><MudTh>Type</MudTh><MudTh Style="text-align:right">Amount</MudTh></HeaderContent>
                     <RowTemplate>
-                        <MudTd Style="font-family:monospace;font-size:12px">@context.VoucherNo</MudTd>
+                        <MudTd Class="nx-mono">@context.VoucherNo</MudTd>
                         <MudTd>@context.Type</MudTd>
                         <MudTd Style="text-align:right">@context.TotalDebit.ToString("N0")</MudTd>
                     </RowTemplate>
@@ -80,7 +113,10 @@ else
         </MudItem>
         <MudItem xs="12" md="4">
             <MudPaper Class="pa-4" Elevation="1" Style="height:100%">
-                <MudText Typo="Typo.subtitle1" Class="mb-2">Top AR Balances</MudText>
+                <div class="nx-card-head">
+                    <div class="nx-card-title">Top AR Balances</div>
+                    <MudLink Href="customers" Typo="Typo.caption">Customers</MudLink>
+                </div>
                 <MudTable Items="_topAr" Dense="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
                     <HeaderContent><MudTh>Customer</MudTh><MudTh Style="text-align:right">Outstanding</MudTh></HeaderContent>
                     <RowTemplate>
@@ -93,9 +129,12 @@ else
         </MudItem>
         <MudItem xs="12" md="4">
             <MudPaper Class="pa-4" Elevation="1" Style="height:100%">
-                <MudText Typo="Typo.subtitle1" Class="mb-2">Cash &amp; Bank</MudText>
+                <div class="nx-card-head">
+                    <div class="nx-card-title">Cash &amp; Bank</div>
+                    <div class="nx-card-meta">AED</div>
+                </div>
                 <MudTable Items="_cash" Dense="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
-                    <HeaderContent><MudTh>Account</MudTh><MudTh Style="text-align:right">Balance (AED)</MudTh></HeaderContent>
+                    <HeaderContent><MudTh>Account</MudTh><MudTh Style="text-align:right">Balance</MudTh></HeaderContent>
                     <RowTemplate>
                         <MudTd>@context.Name</MudTd>
                         <MudTd Style="text-align:right;font-weight:600" Class="mud-success-text">@context.Balance.ToString("N0")</MudTd>
@@ -107,7 +146,7 @@ else
 
     @if (_kpis.DraftVouchers > 0)
     {
-        <MudAlert Severity="Severity.Info" Class="mt-3" Dense="true">@_kpis.DraftVouchers draft voucher(s) awaiting posting.</MudAlert>
+        <MudAlert Severity="Severity.Info" Class="mt-4" Dense="true">@_kpis.DraftVouchers draft voucher(s) awaiting posting.</MudAlert>
     }
 }
 
@@ -118,12 +157,22 @@ else
     private List<CustomerSummary> _topAr = new();
     private List<CashBalance> _cash = new();
     private List<AegisErp.Domain.Entities.JournalVoucher> _recent = new();
+    private string _companyName = "…";
 
-    // revenue (blue), expenses (amber)
-    private readonly ChartOptions _chartOptions = new() { ChartPalette = new[] { "#2e86de", "#f0a020" } };
+    // revenue (indigo), expenses (amber). Plotted in AED thousands so axis labels stay short and legible.
+    private readonly ChartOptions _chartOptions = new()
+    {
+        ChartPalette = new[] { "#4f46e5", "#f59e0b" },
+        YAxisTicks = 50,
+        MaxNumYAxisTicks = 8,
+    };
+
+    private static double[] ToThousands(double[] values) => values.Select(v => Math.Round(v / 1000d, 1)).ToArray();
 
     protected override async Task OnInitializedAsync()
     {
+        _companyName = (await Company.GetAsync()).LegalName;
+
         var current = await Ledger.GetDefaultPeriodAsync(DateOnly.FromDateTime(DateTime.Today));
         if (current is not null)
             _kpis = await Ledger.GetDashboardAsync(current.Id);
@@ -132,8 +181,8 @@ else
         _labels = s.Labels;
         _series = new List<ChartSeries>
         {
-            new() { Name = "Revenue", Data = s.Revenue },
-            new() { Name = "Expenses", Data = s.Expense },
+            new() { Name = "Revenue", Data = ToThousands(s.Revenue) },
+            new() { Name = "Expenses", Data = ToThousands(s.Expense) },
         };
 
         _cash = await Ledger.GetCashBalancesAsync();
@@ -142,13 +191,15 @@ else
         _recent = await Journal.GetRecentAsync(6);
     }
 
-    private RenderFragment Kpi(string label, decimal value, Color color, string icon) => __builder =>
+    // colorVar = a MudBlazor palette key (success, error, info, primary, warning) driving the tile's accent.
+    private RenderFragment Kpi(string label, decimal value, string colorVar, string icon, string hint, string hintClass = "") => __builder =>
     {
         <MudItem xs="12" sm="6" md="4" lg="2">
-            <MudPaper Class="pa-4" Elevation="1" Style="height:100%">
-                <MudIcon Icon="@icon" Color="@color" Size="Size.Medium" />
-                <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mt-2">@label</MudText>
-                <MudText Typo="Typo.h6" Color="@color">@value.ToString("N0")</MudText>
+            <MudPaper Elevation="1" Class="nx-kpi" Style="@($"--kpi: var(--mud-palette-{colorVar})")">
+                <div class="nx-kpi__icon"><MudIcon Icon="@icon" /></div>
+                <div class="nx-kpi__label">@label</div>
+                <div class="nx-kpi__value">@value.ToString("N0")</div>
+                <div class="nx-kpi__hint @hintClass">@hint</div>
             </MudPaper>
         </MudItem>
     };

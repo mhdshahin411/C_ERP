@@ -56,9 +56,9 @@ public class CompanyService
 
     private static CompanySetup Default() => new()
     {
-        LegalName = "Aegis FZE",
-        TradeName = "Aegis ERP",
-        CompanyCode = "AEGIS",
+        LegalName = "Nexus Trading FZE",
+        TradeName = "Nexus Trading",
+        CompanyCode = "NEXUS",
         LicenseNumber = "DXB-2019-104578",
         LicenseType = "FZE",
         RegistrationDate = new(2019, 6, 1),
@@ -108,8 +108,8 @@ public class CompanyService
         ApprovalWorkflowEnabled = false,
         BankAccounts = new()
         {
-            new() { BankName = "Emirates NBD", AccountName = "Aegis FZE", AccountNumber = "1015482930001", Iban = "AE070260001015482930001", Swift = "EBILAEAD", Currency = "AED", IsPrimary = true },
-            new() { BankName = "Mashreq Bank", AccountName = "Aegis FZE", AccountNumber = "019100234567", Iban = "AE930330000019100234567", Swift = "BOMLAEAD", Currency = "AED", IsPrimary = false },
+            new() { BankName = "Emirates NBD", AccountName = "Nexus Trading FZE", AccountNumber = "1015482930001", Iban = "AE070260001015482930001", Swift = "EBILAEAD", Currency = "AED", IsPrimary = true },
+            new() { BankName = "Mashreq Bank", AccountName = "Nexus Trading FZE", AccountNumber = "019100234567", Iban = "AE930330000019100234567", Swift = "BOMLAEAD", Currency = "AED", IsPrimary = false },
         },
     };
 }

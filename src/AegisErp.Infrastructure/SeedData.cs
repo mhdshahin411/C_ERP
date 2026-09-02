@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AegisErp.Infrastructure;
 
 /// <summary>
-/// Seeds a demo company (Aegis FZE) matching the HTML prototype: roles and users, a chart
+/// Seeds a demo company (Nexus Trading FZE) matching the HTML prototype: roles and users, a chart
 /// of accounts, cost centres, fiscal periods, an opening-balance voucher, customers, and
 /// AR documents (invoices + receipts) whose GL vouchers are generated through the same
 /// domain posting rules the app uses — so the books are balanced by construction.
@@ -143,9 +143,9 @@ public static class SeedData
             if (!await roles.RoleExistsAsync(role))
                 await roles.CreateAsync(new IdentityRole(role));
 
-        await EnsureUserAsync(users, "admin@aegisfze.com", "Admin@123!", "System Admin", AppRoles.Admin, AppRoles.Accountant);
-        await EnsureUserAsync(users, "finance@aegisfze.com", "Finance@123!", "Fatima Al Rashidi", AppRoles.Accountant);
-        await EnsureUserAsync(users, "viewer@aegisfze.com", "Viewer@123!", "Ahmed Al Mansoori", AppRoles.Viewer);
+        await EnsureUserAsync(users, "admin@nexuserp.com", "Admin@123!", "System Admin", AppRoles.Admin, AppRoles.Accountant);
+        await EnsureUserAsync(users, "finance@nexuserp.com", "Finance@123!", "Fatima Al Rashidi", AppRoles.Accountant);
+        await EnsureUserAsync(users, "viewer@nexuserp.com", "Viewer@123!", "Ahmed Al Mansoori", AppRoles.Viewer);
     }
 
     private static async Task EnsureUserAsync(

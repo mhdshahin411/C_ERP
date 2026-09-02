@@ -1,4 +1,4 @@
-# Deploying Aegis ERP to Azure App Service
+# Deploying NexusERP to Azure App Service
 
 How to host the Blazor Server app on **Azure App Service** and connect it to the
 **Azure SQL Database** (from [AZURE-SETUP.md](AZURE-SETUP.md)) with passwordless
@@ -11,7 +11,7 @@ App Service running .NET 8, connected to Azure SQL via a **managed identity** (n
         rg-aegis-erp  (UAE North)
    ┌──────────────────────────────────────┐
    │  App Service (Linux, .NET 8)  ─HTTPS─►  users
-   │    Aegis ERP (Blazor Server)          │
+   │    NexusERP (Blazor Server)          │
    │        │  system-assigned identity     │
    │        ▼  (no password)                │
    │  Azure SQL Database  aegis_erp         │
@@ -139,7 +139,7 @@ did locally). If you deployed **before** granting DB access in §2, just restart
 ## 6. Verify
 
 1. Browse **https://$APP.azurewebsites.net** → you should get the sign-in page.
-2. Sign in with a seeded account (`admin@aegisfze.com` / `Admin@123!`).
+2. Sign in with a seeded account (`admin@nexuserp.com` / `Admin@123!`).
 3. Check the Trial Balance reads **In balance**.
 4. If something's off, stream the logs:
    ```bash
@@ -152,7 +152,7 @@ did locally). If you deployed **before** granting DB access in §2, just restart
 
 | Item | Why / What |
 |---|---|
-| **Remove the demo seed** | Don't ship `admin@aegisfze.com` / `Admin@123!` to production. Gate the demo users + demo company behind `Development`, and create the first real admin from secure config or Key Vault. |
+| **Remove the demo seed** | Don't ship `admin@nexuserp.com` / `Admin@123!` to production. Gate the demo users + demo company behind `Development`, and create the first real admin from secure config or Key Vault. |
 | **EF migrations** | Switch from `EnsureCreated()` to migrations; then the app identity only needs `db_datareader` + `db_datawriter`, and schema changes are versioned. |
 | **Scale-out** | Blazor Server across multiple instances needs sticky sessions (already enabled) **or**, better, an **Azure SignalR Service** in Default mode to offload circuits. |
 | **Private networking** | VNet-integrate the app and put SQL behind a **Private Endpoint** so the database isn't publicly reachable. |

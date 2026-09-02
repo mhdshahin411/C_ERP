@@ -1,6 +1,6 @@
 # Azure SQL Database — Setup & Connection Runbook
 
-How to create the production database for Aegis ERP on Microsoft Azure and connect the
+How to create the production database for NexusERP on Microsoft Azure and connect the
 app to it. The app already supports SQL Server / Azure SQL — this is purely
 infrastructure + configuration, no code changes.
 
@@ -109,7 +109,7 @@ dotnet run --project src/AegisErp.Web --urls http://localhost:5199
 (The double underscore `__` is how .NET maps environment variables onto nested config keys.)
 
 On first run the app **creates all its tables in Azure SQL and seeds the demo data**
-automatically — the same behavior you saw locally. Sign in with `admin@aegisfze.com` /
+automatically — the same behavior you saw locally. Sign in with `admin@nexuserp.com` /
 `Admin@123!`.
 
 > When the app itself is hosted on Azure (App Service), you set these same two values in the

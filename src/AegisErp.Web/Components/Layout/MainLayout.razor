@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @inject LedgerService Ledger
+@inject CompanyService Company
 
 @* One-way IsDarkMode: the app controls the theme (default light) so the OS preference can't flip it unexpectedly. The toolbar button toggles _isDark. *@
 <MudThemeProvider Theme="_theme" IsDarkMode="_isDark" />
@@ -8,37 +9,51 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Dense="true">
+    <MudAppBar Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
                        OnClick="@(() => _drawerOpen = !_drawerOpen)" />
-        <MudText Typo="Typo.h6" Class="ml-2" Style="font-weight:700;letter-spacing:-.3px">Aegis&nbsp;ERP</MudText>
-        <MudText Typo="Typo.caption" Class="ml-2 d-none d-sm-flex" Style="opacity:.7">Finance &amp; Operations</MudText>
+
+        <a href="/" class="nx-brand" aria-label="NexusERP home">
+            <span class="nx-brand__mark">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M20 46V18h6l12 18V18h6v28h-6L26 28v18z" fill="#fff" />
+                </svg>
+            </span>
+            <span class="nx-brand__name">Nexus<b>ERP</b></span>
+        </a>
+
         <MudSpacer />
-        <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Inherit" Icon="@Icons.Material.Filled.Business" Class="d-none d-md-flex">Aegis FZE · UAE</MudChip>
-        <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Inherit" Icon="@Icons.Material.Filled.CalendarMonth" Class="d-none d-md-flex">@_periodLabel</MudChip>
-        <MudIconButton Icon="@(_isDark ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                       Color="Color.Inherit" OnClick="@(() => _isDark = !_isDark)" />
+
+        <div class="d-none d-md-flex align-center gap-2 mr-2">
+            <span class="nx-pill"><MudIcon Icon="@Icons.Material.Filled.Business" /> @_companyLabel</span>
+            <span class="nx-pill"><MudIcon Icon="@Icons.Material.Filled.CalendarMonth" /> @_periodLabel</span>
+        </div>
+
+        <MudTooltip Text="@(_isDark ? "Switch to light theme" : "Switch to dark theme")">
+            <MudIconButton Icon="@(_isDark ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                           Color="Color.Inherit" OnClick="@(() => _isDark = !_isDark)" />
+        </MudTooltip>
+
         <AuthorizeView>
             <Authorized>
-                <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="ml-1">
                     <ActivatorContent>
-                        <MudChip T="string" Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" Variant="Variant.Text">
-                            @context.User.Identity?.Name
-                        </MudChip>
+                        <div class="nx-user">
+                            <MudAvatar Size="Size.Small" Class="nx-avatar">@Initials(context.User.Identity?.Name)</MudAvatar>
+                            <span class="d-none d-sm-inline">@DisplayName(context.User.Identity?.Name)</span>
+                            <MudIcon Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
+                        </div>
                     </ActivatorContent>
                     <ChildContent>
-                        <div class="px-4 py-2">
+                        <div class="px-4 py-3" style="min-width:230px">
                             <MudText Typo="Typo.body2"><b>@context.User.Identity?.Name</b></MudText>
-                            <MudText Typo="Typo.caption" Class="mud-text-secondary">
-                                @string.Join(", ", context.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))
-                            </MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">@Roles(context.User)</MudText>
                         </div>
                         <MudDivider />
-                        <form action="Account/Logout" method="post" class="px-4 py-2">
+                        <form action="Account/Logout" method="post" class="px-2 py-1">
                             <AntiforgeryToken />
-                            <button type="submit"
-                                    style="background:none;border:none;cursor:pointer;color:var(--mud-palette-error);font-size:13px;font-weight:600;padding:0">
-                                Sign out
+                            <button type="submit" class="nx-signout">
+                                <MudIcon Icon="@Icons.Material.Filled.Logout" Size="Size.Small" /> Sign out
                             </button>
                         </form>
                     </ChildContent>
@@ -47,12 +62,12 @@
         </AuthorizeView>
     </MudAppBar>
 
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="2" ClipMode="DrawerClipMode.Always" Variant="DrawerVariant.Responsive">
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="0" ClipMode="DrawerClipMode.Always" Variant="DrawerVariant.Responsive" Width="264px">
         <NavMenu />
     </MudDrawer>
 
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+        <MudContainer MaxWidth="MaxWidth.False" Class="nx-page">
             @Body
         </MudContainer>
     </MudMainContent>
@@ -64,112 +79,130 @@
     <a class="dismiss">🗙</a>
 </div>
 
-@* App-bar text/chips: MudChip's text variant dims the inherited colour to a faint grey on the
-   navy bar. Force crisp white with a subtle translucent pill so they read clearly. *@
-<style>
-    .mud-appbar .mud-chip.mud-chip-text {
-        color: #ffffff !important;
-        background-color: rgba(255, 255, 255, 0.10);
-        font-weight: 500;
-    }
-    .mud-appbar .mud-chip .mud-chip-icon,
-    .mud-appbar .mud-chip .mud-icon-root,
-    .mud-appbar .mud-chip.mud-chip-text:hover {
-        color: rgba(255, 255, 255, 0.9) !important;
-    }
-    .mud-appbar .mud-chip.mud-chip-text:hover {
-        background-color: rgba(255, 255, 255, 0.18);
-    }
-    /* Toolbar icon buttons (menu, dark-mode) crisp white */
-    .mud-appbar .mud-icon-button { color: rgba(255, 255, 255, 0.9); }
-</style>
-
 @code {
     private bool _drawerOpen = true;
     private bool _isDark = false;
     private string _periodLabel = "…";
+    private string _companyLabel = "…";
 
     protected override async Task OnInitializedAsync()
     {
         var p = await Ledger.GetDefaultPeriodAsync(DateOnly.FromDateTime(DateTime.Today));
         _periodLabel = p is null ? "No period" : $"Period {p.PeriodNo} · {p.Name}";
+
+        var c = await Company.GetAsync();
+        var place = string.IsNullOrWhiteSpace(c.Emirate) ? c.Country : c.Emirate;
+        _companyLabel = string.IsNullOrWhiteSpace(place) ? c.LegalName : $"{c.LegalName} · {place}";
     }
 
-    // Palette mapped to the original prototype's design tokens, tuned for both modes.
+    private static string LocalPart(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "User";
+        var at = name.IndexOf('@');
+        return at > 0 ? name[..at] : name;
+    }
+
+    private static string DisplayName(string? name)
+    {
+        var l = LocalPart(name);
+        return char.ToUpperInvariant(l[0]) + l[1..];
+    }
+
+    private static string Initials(string? name)
+    {
+        var l = LocalPart(name);
+        var parts = l.Split(new[] { '.', '_', '-' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[1][0])}";
+        return (l.Length >= 2 ? l[..2] : l).ToUpperInvariant();
+    }
+
+    private static string Roles(System.Security.Claims.ClaimsPrincipal user) =>
+        string.Join(", ", user.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value));
+
+    // NexusERP palette — indigo accent on a cool slate neutral scale, tuned for both modes.
     private readonly MudTheme _theme = new()
     {
         PaletteLight = new PaletteLight
         {
-            Primary = "#2e86de",
+            Primary = "#4f46e5",
             PrimaryContrastText = "#ffffff",
-            Secondary = "#5b2da0",
-            Info = "#185fa5",
-            Success = "#0f6b35",
-            Warning = "#92600a",
-            Error = "#c0392b",
-            Dark = "#1f2d3d",
+            Secondary = "#7c3aed",
+            SecondaryContrastText = "#ffffff",
+            Tertiary = "#0d9488",
+            Info = "#0284c7",
+            Success = "#16a34a",
+            Warning = "#d97706",
+            Error = "#dc2626",
+            Dark = "#0f172a",
 
-            Background = "#f5f6f8",
+            Background = "#f5f7fb",
             Surface = "#ffffff",
-            BackgroundGray = "#eceef2",
+            BackgroundGray = "#f1f4f9",
 
-            AppbarBackground = "#1f2d3d",
-            AppbarText = "rgba(255,255,255,0.92)",
+            AppbarBackground = "#ffffff",
+            AppbarText = "#0f172a",
             DrawerBackground = "#ffffff",
-            DrawerText = "#3a4256",
-            DrawerIcon = "#5a6478",
+            DrawerText = "#334155",
+            DrawerIcon = "#64748b",
 
-            TextPrimary = "#1c2333",
-            TextSecondary = "#5a6478",
-            TextDisabled = "rgba(28,35,51,0.38)",
-            ActionDefault = "#6b7488",
-            ActionDisabled = "rgba(28,35,51,0.26)",
-            ActionDisabledBackground = "rgba(28,35,51,0.10)",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#64748b",
+            TextDisabled = "rgba(15,23,42,0.38)",
+            ActionDefault = "#64748b",
+            ActionDisabled = "rgba(15,23,42,0.26)",
+            ActionDisabledBackground = "rgba(15,23,42,0.08)",
 
-            LinesDefault = "#e2e5ec",
-            LinesInputs = "#c8cdd8",
-            Divider = "#e6e9f0",
-            DividerLight = "rgba(0,0,0,0.05)",
-            TableLines = "#e6e9f0",
-            TableStriped = "rgba(28,35,51,0.02)",
-            TableHover = "rgba(46,134,222,0.07)",
+            LinesDefault = "#e2e8f0",
+            LinesInputs = "#cbd5e1",
+            Divider = "#e8edf3",
+            DividerLight = "rgba(15,23,42,0.05)",
+            TableLines = "#eef2f7",
+            TableStriped = "rgba(15,23,42,0.015)",
+            TableHover = "rgba(79,70,229,0.05)",
         },
         PaletteDark = new PaletteDark
         {
-            Primary = "#5b9ef2",
-            PrimaryContrastText = "#0a1220",
+            Primary = "#818cf8",
+            PrimaryContrastText = "#0b1220",
             Secondary = "#a78bfa",
-            Info = "#60a5fa",
+            SecondaryContrastText = "#0b1220",
+            Tertiary = "#2dd4bf",
+            Info = "#38bdf8",
             Success = "#4ade80",
             Warning = "#fbbf24",
             Error = "#f87171",
-            Dark = "#0d1117",
+            Dark = "#020617",
 
-            Background = "#161a21",     // page
-            Surface = "#1e2530",        // cards / paper (elevated)
-            BackgroundGray = "#232b37",
+            Background = "#0b1220",     // page
+            Surface = "#111a2e",        // cards / paper
+            BackgroundGray = "#162036",
 
-            AppbarBackground = "#111820",
-            AppbarText = "rgba(255,255,255,0.92)",
-            DrawerBackground = "#151a22",
-            DrawerText = "#a6afc0",
-            DrawerIcon = "#8790a4",
+            AppbarBackground = "#111a2e",
+            AppbarText = "#e2e8f0",
+            DrawerBackground = "#0f172a",
+            DrawerText = "#cbd5e1",
+            DrawerIcon = "#94a3b8",
 
-            TextPrimary = "#e8eaf0",
-            TextSecondary = "#a6afc0",
-            TextDisabled = "rgba(232,234,240,0.34)",
-            ActionDefault = "#8891a3",
-            ActionDisabled = "rgba(232,234,240,0.26)",
-            ActionDisabledBackground = "rgba(232,234,240,0.10)",
+            TextPrimary = "#e2e8f0",
+            TextSecondary = "#94a3b8",
+            TextDisabled = "rgba(226,232,240,0.34)",
+            ActionDefault = "#94a3b8",
+            ActionDisabled = "rgba(226,232,240,0.26)",
+            ActionDisabledBackground = "rgba(226,232,240,0.10)",
 
-            LinesDefault = "#2c3242",
-            LinesInputs = "#3a4152",
-            Divider = "#2c3242",
+            LinesDefault = "#1e293b",
+            LinesInputs = "#334155",
+            Divider = "#1e293b",
             DividerLight = "rgba(255,255,255,0.06)",
-            TableLines = "#2c3242",
-            TableStriped = "rgba(255,255,255,0.03)",
-            TableHover = "rgba(91,158,242,0.10)",
+            TableLines = "#1e293b",
+            TableStriped = "rgba(255,255,255,0.02)",
+            TableHover = "rgba(129,140,248,0.08)",
         },
-        LayoutProperties = new LayoutProperties { DefaultBorderRadius = "7px" }
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "10px",
+            AppbarHeight = "60px",
+            DrawerWidthLeft = "264px",
+        }
     };
 }

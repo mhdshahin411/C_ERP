@@ -1,6 +1,6 @@
-# Aegis ERP — System Flow & Architecture
+# NexusERP — System Flow & Architecture
 
-> A complete walkthrough of how Aegis ERP works end to end: the architecture, the
+> A complete walkthrough of how NexusERP works end to end: the architecture, the
 > accounting model, the posting engine at its heart, authentication, and the full flow
 > of every module built so far (General Ledger + Accounts Receivable).
 
@@ -16,7 +16,7 @@ extension), and most Markdown viewers.
 
 ## Table of contents
 
-1. [What Aegis ERP is](#1-what-aegis-erp-is)
+1. [What NexusERP is](#1-what-aegis-erp-is)
 2. [Technology stack](#2-technology-stack)
 3. [Architecture at a glance](#3-architecture-at-a-glance)
 4. [Solution structure](#4-solution-structure)
@@ -37,9 +37,9 @@ extension), and most Markdown viewers.
 
 ---
 
-## 1. What Aegis ERP is
+## 1. What NexusERP is
 
-Aegis ERP is a finance & operations system for a fictional UAE company, **Aegis FZE**
+NexusERP is a finance & operations system for a fictional UAE company, **Nexus Trading FZE**
 (currency AED, 5% VAT). It began as a single-file HTML prototype
 (`aegis_erp_bc 17.05.2026.html`) styled after Microsoft Dynamics 365 Business Central,
 and is being rebuilt as a real full-stack application.
@@ -432,7 +432,7 @@ signed-in user lacks the role they get `/Account/AccessDenied`.
 
 ## 9. Request lifecycle (Blazor Server)
 
-Aegis runs as **Blazor Server**: the UI lives on the server and talks to the browser over a
+NexusERP runs as **Blazor Server**: the UI lives on the server and talks to the browser over a
 SignalR "circuit". A user click is an event on the server; the server re-renders and pushes a
 DOM diff back.
 
@@ -663,9 +663,9 @@ realistic data.
 
 | Email | Password | Roles |
 |---|---|---|
-| admin@aegisfze.com | Admin@123! | Admin, Accountant |
-| finance@aegisfze.com | Finance@123! | Accountant |
-| viewer@aegisfze.com | Viewer@123! | Viewer |
+| admin@nexuserp.com | Admin@123! | Admin, Accountant |
+| finance@nexuserp.com | Finance@123! | Accountant |
+| viewer@nexuserp.com | Viewer@123! | Viewer |
 
 **Fiscal periods:** Apr, May, Jun, Jul 2026.
 **Cost centers:** Admin, Passport Services, Travel & Tourism, HR.

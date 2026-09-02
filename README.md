@@ -1,4 +1,4 @@
-# Aegis ERP
+# NexusERP
 
 A full-stack ERP for finance & operations, being built out from the original
 single-file HTML prototype (`aegis_erp_bc 17.05.2026.html`).
@@ -32,11 +32,11 @@ balanced by construction.
 
 | Email | Password | Roles |
 |---|---|---|
-| admin@aegisfze.com | Admin@123! | Admin, Accountant |
-| finance@aegisfze.com | Finance@123! | Accountant |
-| viewer@aegisfze.com | Viewer@123! | Viewer (read-only) |
+| admin@nexuserp.com | Admin@123! | Admin, Accountant |
+| finance@nexuserp.com | Finance@123! | Accountant |
+| viewer@nexuserp.com | Viewer@123! | Viewer (read-only) |
 
-The database is seeded on first run with the demo company (Aegis FZE, AED): chart of
+The database is seeded on first run with the demo company (Nexus Trading FZE, AED): chart of
 accounts, opening balances, three customers, four sales invoices and two receipts —
 all posted through the real double-entry engine, so the trial balance is in balance
 and the AR aging shows a live overdue picture.

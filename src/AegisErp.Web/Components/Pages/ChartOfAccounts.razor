@@ -3,39 +3,40 @@
 @using System.Text
 @using AegisErp.Web.Components.Dialogs
 @inject ChartOfAccountsService Coa
+@inject CompanyService Company
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
 
-<PageTitle>Chart of Accounts · Aegis ERP</PageTitle>
+<PageTitle>Chart of Accounts · NexusERP</PageTitle>
 
-<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+<div class="nx-page-head">
     <div>
+        <div class="nx-eyebrow">General Ledger</div>
         <MudText Typo="Typo.h5">Chart of Accounts</MudText>
-        <MudText Typo="Typo.body2" Class="mud-text-secondary">Aegis FZE · AED</MudText>
+        <div class="nx-sub">@_companyLabel</div>
     </div>
-    <MudSpacer />
     <MudTextField @bind-Value="_search" Placeholder="Filter by number or name…" Immediate="true" DebounceInterval="200"
                   Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Margin="Margin.Dense"
-                  Variant="Variant.Outlined" Style="max-width:280px" Class="mt-0" />
-</MudStack>
+                  Variant="Variant.Outlined" Style="max-width:300px" Class="mt-0" />
+</div>
 
-@* ── Action toolbar (matches the reference: Manage · Data · Reports) ── *@
+@* ── Action toolbar (matches the reference: Manage · Data · View) ── *@
 <div class="coa-toolbar">
     <AuthorizeView Roles="@AppRoles.Posters">
         <div class="tb-grp">
             <div class="tb-btns">
-                <button class="tb-b prim" @onclick="OpenNew"><span>➕</span>New</button>
-                <button class="tb-b" @onclick="OpenEdit" disabled="@(_selectedId is null)"><span>✏️</span>Edit</button>
-                <button class="tb-b dng" @onclick="DeleteSelected" disabled="@(_selectedId is null)"><span>🗑</span>Delete</button>
+                <button class="tb-b prim" @onclick="OpenNew"><MudIcon Icon="@Icons.Material.Filled.Add" />New</button>
+                <button class="tb-b" @onclick="OpenEdit" disabled="@(_selectedId is null)"><MudIcon Icon="@Icons.Material.Filled.Edit" />Edit</button>
+                <button class="tb-b dng" @onclick="DeleteSelected" disabled="@(_selectedId is null)"><MudIcon Icon="@Icons.Material.Filled.DeleteOutline" />Delete</button>
             </div>
             <div class="tb-lbl">Manage</div>
         </div>
         <div class="tb-sep"></div>
         <div class="tb-grp">
             <div class="tb-btns">
-                <button class="tb-b" @onclick="@(() => Snackbar.Add("Import — coming soon", Severity.Info))"><span>📥</span>Import</button>
-                <button class="tb-b" @onclick="ExportCsv"><span>📤</span>Export</button>
+                <button class="tb-b" @onclick="@(() => Snackbar.Add("Import — coming soon", Severity.Info))"><MudIcon Icon="@Icons.Material.Filled.FileUpload" />Import</button>
+                <button class="tb-b" @onclick="ExportCsv"><MudIcon Icon="@Icons.Material.Filled.FileDownload" />Export</button>
             </div>
             <div class="tb-lbl">Data</div>
         </div>
@@ -43,9 +44,9 @@
     <div class="tb-sep"></div>
     <div class="tb-grp">
         <div class="tb-btns">
-            <button class="tb-b" @onclick="Print"><span>🖨</span>Print</button>
-            <button class="tb-b" @onclick="ExpandAll"><span>⊕</span>Expand all</button>
-            <button class="tb-b" @onclick="CollapseAll"><span>⊖</span>Collapse all</button>
+            <button class="tb-b" @onclick="Print"><MudIcon Icon="@Icons.Material.Filled.Print" />Print</button>
+            <button class="tb-b" @onclick="ExpandAll"><MudIcon Icon="@Icons.Material.Filled.UnfoldMore" />Expand all</button>
+            <button class="tb-b" @onclick="CollapseAll"><MudIcon Icon="@Icons.Material.Filled.UnfoldLess" />Collapse all</button>
         </div>
         <div class="tb-lbl">View</div>
     </div>
@@ -122,8 +123,14 @@
     private readonly HashSet<int> _collapsed = new();
     private int? _selectedId;
     private string _search = "";
+    private string _companyLabel = "…";
 
-    protected override async Task OnInitializedAsync() => await Reload();
+    protected override async Task OnInitializedAsync()
+    {
+        var c = await Company.GetAsync();
+        _companyLabel = $"{c.LegalName} · {c.BaseCurrency}";
+        await Reload();
+    }
 
     private async Task Reload()
     {
@@ -236,15 +243,16 @@
 
 <style>
     .coa-toolbar { display:flex; align-items:stretch; gap:0; background:var(--mud-palette-surface);
-        border:1px solid var(--mud-palette-lines-default); border-radius:8px; padding:6px 4px; margin-bottom:12px; flex-wrap:wrap; }
+        border:1px solid var(--mud-palette-lines-default); border-radius:12px; padding:6px 4px; margin-bottom:14px; flex-wrap:wrap;
+        box-shadow:var(--nx-shadow-card); }
     .coa-toolbar .tb-grp { display:flex; flex-direction:column; align-items:center; padding:0 10px; }
     .coa-toolbar .tb-btns { display:flex; gap:2px; }
-    .coa-toolbar .tb-lbl { font-size:10.5px; color:var(--mud-palette-text-secondary); text-transform:uppercase; letter-spacing:.05em; margin-top:3px; }
+    .coa-toolbar .tb-lbl { font-size:10px; font-weight:700; color:var(--mud-palette-text-secondary); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
     .coa-toolbar .tb-sep { width:1px; background:var(--mud-palette-lines-default); margin:2px 4px; }
-    .tb-b { display:flex; flex-direction:column; align-items:center; gap:2px; min-width:52px; padding:5px 8px;
-        background:none; border:1px solid transparent; border-radius:6px; cursor:pointer; font-size:11.5px;
+    .tb-b { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:56px; padding:6px 8px;
+        background:none; border:1px solid transparent; border-radius:8px; cursor:pointer; font-size:11.5px; font-weight:500;
         color:var(--mud-palette-text-primary); font-family:inherit; line-height:1.2; }
-    .tb-b span { font-size:15px; }
+    .tb-b .mud-icon-root { font-size:20px; width:20px; height:20px; }
     .tb-b:hover:not(:disabled) { background:var(--mud-palette-action-default-hover); border-color:var(--mud-palette-lines-default); }
     .tb-b:disabled { opacity:.4; cursor:not-allowed; }
     .tb-b.prim { color:var(--mud-palette-primary); }
