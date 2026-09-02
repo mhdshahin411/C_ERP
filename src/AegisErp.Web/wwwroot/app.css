@@ -130,6 +130,40 @@ html, body {
 .nx-page-head .nx-sub { margin-top: 2px; color: var(--mud-palette-text-secondary); font-size: .85rem; }
 .nx-eyebrow { font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mud-palette-primary); margin-bottom: 2px; }
 
+/* ── Gradient hero (dashboard) — same brand energy as the login page ── */
+.nx-hero {
+    position: relative; overflow: hidden; border-radius: 18px; padding: 30px 34px; color: #fff;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #9333ea 100%);
+    box-shadow: 0 12px 32px rgba(79, 70, 229, .26); margin-bottom: 24px;
+}
+.nx-hero::before, .nx-hero::after { content: ""; position: absolute; border-radius: 999px; pointer-events: none; }
+.nx-hero::before { width: 340px; height: 340px; right: -110px; top: -140px; background: rgba(255,255,255,.10); }
+.nx-hero::after  { width: 250px; height: 250px; left: -90px; bottom: -130px; background: rgba(255,255,255,.08); }
+.nx-hero__content { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.nx-hero__eyebrow { font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .85; margin-bottom: 6px; }
+.nx-hero__title { font-size: 1.6rem; font-weight: 700; letter-spacing: -.02em; margin: 0 0 12px; line-height: 1.2; }
+.nx-hero__meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.nx-hero__pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px;
+    font-size: .78rem; font-weight: 500; background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(4px);
+}
+.nx-hero__pill.ok { background: rgba(34,197,94,.28); border-color: rgba(134,239,172,.5); font-weight: 600; }
+.nx-hero__pill.warn { background: rgba(245,158,11,.3); border-color: rgba(253,230,138,.5); font-weight: 600; }
+.nx-hero__pill .mud-icon-root { font-size: .95rem; width: .95rem; height: .95rem; }
+.nx-hero__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.nx-btn-white, .nx-btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px;
+    font-size: .875rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+    transition: transform .06s ease, box-shadow .12s ease, background .12s ease;
+}
+.nx-btn-white { background: #fff; color: #4f46e5; box-shadow: 0 2px 10px rgba(15,23,42,.18); }
+.nx-btn-white:hover { box-shadow: 0 6px 18px rgba(15,23,42,.24); }
+.nx-btn-white:active { transform: translateY(1px); }
+.nx-btn-ghost { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+.nx-btn-ghost:hover { background: rgba(255,255,255,.2); }
+.nx-btn-white .mud-icon-root, .nx-btn-ghost .mud-icon-root { font-size: 1.05rem; width: 1.05rem; height: 1.05rem; }
+
 /* Card header helper */
 .nx-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .nx-card-title { font-size: .95rem; font-weight: 600; letter-spacing: -.01em; }
@@ -164,7 +198,7 @@ html, body {
 .nx-action:hover { background: var(--mud-palette-action-default-hover); border-color: var(--mud-palette-lines-default); }
 .nx-action__icon {
     width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; flex: 0 0 auto;
-    background: color-mix(in srgb, var(--mud-palette-primary) 10%, transparent); color: var(--mud-palette-primary);
+    background: var(--nx-gradient); color: #fff; box-shadow: 0 2px 6px rgba(99, 102, 241, .30);
 }
 .nx-action__text { display: flex; flex-direction: column; line-height: 1.25; flex: 1; }
 .nx-action__text b { font-size: .85rem; font-weight: 600; color: var(--mud-palette-text-primary); }

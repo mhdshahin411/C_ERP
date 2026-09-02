@@ -7,26 +7,41 @@
 
 <PageTitle>Dashboard · NexusERP</PageTitle>
 
-<div class="nx-page-head">
-    <div>
-        <div class="nx-eyebrow">Overview</div>
-        <MudText Typo="Typo.h5">Finance Dashboard</MudText>
-        <div class="nx-sub">@_companyName · @(_kpis?.Period ?? "…") · AED</div>
-    </div>
-    <AuthorizeView Roles="@AppRoles.Posters">
-        <div class="d-flex gap-2">
-            <MudButton Href="sales-invoice" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ReceiptLong">New Invoice</MudButton>
-            <MudButton Href="journal-voucher" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">New Voucher</MudButton>
-        </div>
-    </AuthorizeView>
-</div>
-
 @if (_kpis is null)
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
 }
 else
 {
+    @* ── Gradient hero — same brand energy as the sign-in page ── *@
+    <div class="nx-hero">
+        <div class="nx-hero__content">
+            <div>
+                <div class="nx-hero__eyebrow">Finance Dashboard</div>
+                <h1 class="nx-hero__title">@HeroTitle 👋</h1>
+                <div class="nx-hero__meta">
+                    <span class="nx-hero__pill"><MudIcon Icon="@Icons.Material.Filled.Business" /> @_companyName</span>
+                    <span class="nx-hero__pill"><MudIcon Icon="@Icons.Material.Filled.CalendarMonth" /> @_kpis.Period</span>
+                    <span class="nx-hero__pill">AED</span>
+                    @if (_balanced == true)
+                    {
+                        <span class="nx-hero__pill ok"><MudIcon Icon="@Icons.Material.Filled.CheckCircle" /> Books in balance</span>
+                    }
+                    else if (_balanced == false)
+                    {
+                        <span class="nx-hero__pill warn"><MudIcon Icon="@Icons.Material.Filled.WarningAmber" /> Out of balance</span>
+                    }
+                </div>
+            </div>
+            <AuthorizeView Roles="@AppRoles.Posters">
+                <div class="nx-hero__actions">
+                    <a class="nx-btn-ghost" href="sales-invoice"><MudIcon Icon="@Icons.Material.Filled.ReceiptLong" /> New Invoice</a>
+                    <a class="nx-btn-white" href="journal-voucher"><MudIcon Icon="@Icons.Material.Filled.Add" /> New Voucher</a>
+                </div>
+            </AuthorizeView>
+        </div>
+    </div>
+
     @* ── KPI tiles ── *@
     <MudGrid Spacing="3">
         @Kpi("Income", _kpis.Income, "success", Icons.Material.Filled.TrendingUp, "This period")
@@ -151,6 +166,8 @@ else
 }
 
 @code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
     private DashboardKpis? _kpis;
     private List<ChartSeries>? _series;
     private string[]? _labels;
@@ -158,6 +175,11 @@ else
     private List<CashBalance> _cash = new();
     private List<AegisErp.Domain.Entities.JournalVoucher> _recent = new();
     private string _companyName = "…";
+    private string _greeting = "Welcome back";
+    private string _userName = "";
+    private bool? _balanced;
+
+    private string HeroTitle => string.IsNullOrEmpty(_userName) ? _greeting : $"{_greeting}, {_userName}";
 
     // revenue (indigo), expenses (amber). Plotted in AED thousands so axis labels stay short and legible.
     private readonly ChartOptions _chartOptions = new()
@@ -169,13 +191,52 @@ else
 
     private static double[] ToThousands(double[] values) => values.Select(v => Math.Round(v / 1000d, 1)).ToArray();
 
+    // Time-of-day greeting in the company's time zone (falls back to UAE time).
+    private static string Greeting(string? tz)
+    {
+        DateTime now;
+        try
+        {
+            var zone = TimeZoneInfo.FindSystemTimeZoneById(string.IsNullOrWhiteSpace(tz) ? "Asia/Dubai" : tz);
+            now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone);
+        }
+        catch { now = DateTime.UtcNow.AddHours(4); }
+
+        // Patterns ordered high-to-low so none start with '<' (which Razor would read as markup).
+        return now.Hour switch
+        {
+            >= 17 => "Good evening",
+            >= 12 => "Good afternoon",
+            >= 5 => "Good morning",
+            _ => "Working late",
+        };
+    }
+
+    private static string DisplayName(string? identityName)
+    {
+        if (string.IsNullOrWhiteSpace(identityName)) return "";
+        var local = identityName.Split('@')[0]; // '@' = the at-sign (a literal '@' breaks Razor parsing)
+        return char.ToUpperInvariant(local[0]) + local[1..];
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        _companyName = (await Company.GetAsync()).LegalName;
+        var company = await Company.GetAsync();
+        _companyName = company.LegalName;
+        _greeting = Greeting(company.TimeZone);
+
+        if (AuthState is not null)
+        {
+            var auth = await AuthState;
+            _userName = DisplayName(auth.User.Identity?.Name);
+        }
 
         var current = await Ledger.GetDefaultPeriodAsync(DateOnly.FromDateTime(DateTime.Today));
         if (current is not null)
+        {
             _kpis = await Ledger.GetDashboardAsync(current.Id);
+            _balanced = (await Ledger.GetTrialBalanceAsync(current.Id)).IsBalanced;
+        }
 
         var s = await Ledger.GetRevenueExpenseSeriesAsync();
         _labels = s.Labels;
